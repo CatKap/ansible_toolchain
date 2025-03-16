@@ -1,0 +1,9 @@
+- name: Taiga Install Playbook
+  hosts: all
+
+  tasks:
+    - include: playbook-01-nginx-check.yaml
+    - include: playbook-02-ssl-check.yaml
+    - include: playbook-03-postrges-check.yaml
+
+

@@ -1,0 +1,33 @@
+- name: Postgress install  
+  hosts: all
+  vars:
+    item: 
+    packages:
+      - postgresql
+      - postgresql-contrib 
+      - postgresql-server-dev-all
+  tasks:
+  - name: Check packages installation in Debian
+    apt:
+      name: "{{item}}"
+      state: present
+    with_items: "{{packages}}"
+    when: "ansible_facts['os_family'] == 'Debian'"
+    become: true
+  
+  
+  - name: Check installation in RedHat
+    dnf:
+      name: "{{item}}"
+      state: present
+      with_items: "{{packages}}"
+    when: "ansible_facts['os_family'] == 'RedHat'"
+    become: true
+  
+  - name: Enable postgresql in systemd  
+    systemd:
+      name: postgresql.service
+      enabled: true
+
+  - name: Start Postgress  
+    ansible.builtin.command: pg_ctlcluster start $(pg_conftool show cluster_name -s | sed 's,/, ,')

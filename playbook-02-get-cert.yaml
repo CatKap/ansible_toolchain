@@ -1,0 +1,40 @@
+- name: Get SSL certificate using web server
+  become: true
+  hosts: all
+  vars:
+    setup_web_server: false
+    acl_path: '/var/www/{{inventory_hostname}}/.well-known/'
+
+  tasks:
+    - name: Gather package facts
+      package_facts:
+        manager: auto
+
+
+    - name: Install getSSL
+      ansible.builtin.get_url:
+         url: https://raw.githubusercontent.com/srvrco/getssl/latest/getssl 
+         dest: /usr/bin/getssl 
+         mode: '700'
+
+    - name: Create default config files
+      ansible.builtin.command: getssl -c {{ inventory_hostname }}
+    
+    # TODO: write noraml getssl config to be aware about errors on server
+    - name: Change Acme Challange Location directory
+      ansible.builtin.command: echo "ACL=('{{ acl_path }}/acme-challenge')" >> /root/.getssl/{{inventory_hostname}}/getssl.cfg
+      become: true
+ 
+    - name: Mkdir for ACL
+      ansible.builtin.command: mkdir -p {{acl_path}}
+
+    - name: Apply config if nginx present
+      import_role: 
+        name: role-02-nginx-ssl-setup.yaml
+      when: "'nginx' in ansible_facts.packages"
+    
+    - name: Get ssl cert 
+      ansible.builtin.command: getssl {{inventory_hostname}}
+
+    # Probably set a cron, but not now
+

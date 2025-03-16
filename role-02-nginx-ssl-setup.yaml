@@ -1,0 +1,15 @@
+
+- name: Copy server config file to nginx  
+  ansible.builtin.template:
+    src: ./files/nginx-ssl-conf.conf.j2
+    dest: /etc/nginx/sites/enabled{{invenoty_hostname}}.conf
+    owner: root
+    group: root
+    mode: '0644'
+    become: true
+
+- name: Restart nginx 
+  systemd:
+    name: nginx.service
+    state: restarted
+    become: true
