@@ -5,10 +5,38 @@
     setup_web_server: false
     acl_path: '/var/www/{{inventory_hostname}}/.well-known/'
 
+
   tasks:
+    - name: Install nginx
+      include_tasks: ./task-01-nginx-check.yaml
+    
+    - name: Nginx setup 
+      include_tasks: ./task-02-nginx-ssl-setup.yaml
+    
+    - name: Check getssl intallation
+      shell: ls /root/.getssl_installed
+      register: result
+      ignore_errors: yes
+
+
+    - name: Exit from host if play already played
+      meta: end_host 
+      when: "not result.failed"
+
     - name: Gather package facts
       package_facts:
         manager: auto
+    
+    - name: Install curl if not
+      ansible.builtin.apt:
+        package: curl
+        state: present
+      when: "'curl' not in ansible_facts.packages"
+
+    - name: Chesk getSSL installation
+      shell: which getssl
+      register: result
+      ignore_errors: yes
 
 
     - name: Install getSSL
@@ -16,25 +44,28 @@
          url: https://raw.githubusercontent.com/srvrco/getssl/latest/getssl 
          dest: /usr/bin/getssl 
          mode: '700'
+      when:  result.failed 
+
 
     - name: Create default config files
       ansible.builtin.command: getssl -c {{ inventory_hostname }}
+
     
     # TODO: write noraml getssl config to be aware about errors on server
     - name: Change Acme Challange Location directory
-      ansible.builtin.command: echo "ACL=('{{ acl_path }}/acme-challenge')" >> /root/.getssl/{{inventory_hostname}}/getssl.cfg
+      ansible.builtin.raw: "echo \"ACL=('{{ acl_path }}acme-challenge')\" >> /root/.getssl/{{inventory_hostname}}/getssl.cfg"
       become: true
  
     - name: Mkdir for ACL
       ansible.builtin.command: mkdir -p {{acl_path}}
 
     - name: Apply config if nginx present
-      import_role: 
-        name: role-02-nginx-ssl-setup.yaml
+      import_tasks: task-02-nginx-ssl-setup.yaml
       when: "'nginx' in ansible_facts.packages"
-    
+
     - name: Get ssl cert 
       ansible.builtin.command: getssl {{inventory_hostname}}
 
-    # Probably set a cron, but not now
+    - name: Create file describing thats script was runned 
+      ansible.builtin.raw: echo 1 > /root/.getssl_installed
 

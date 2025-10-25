@@ -1,2 +1,7 @@
 inventory.yml
 00-base-setup-*.sh
+\.*
+modules/
+roles/
+ansible-pure-ftpd/
+weareinactive*/

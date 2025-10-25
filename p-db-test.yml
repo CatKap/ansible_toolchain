@@ -1,0 +1,20 @@
+- name: Create databases
+  hosts: quest
+
+
+  tasks:
+    - name: Create postgres database and auth
+      become: true
+      become_user: postgres
+      postgres:
+        user:
+          name: "test"
+          password: "12345"
+          auth:
+            type: host
+            method: sha256
+            args: 192.168.122.0/24
+        db_names:
+          - quest
+
+

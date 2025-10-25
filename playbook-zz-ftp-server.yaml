@@ -1,0 +1,49 @@
+---
+- name: Install and configure FTP server
+  hosts: all
+  become: yes
+  vars:
+    ftp_anonymous_enable: "NO"
+    ftp_local_enable: "YES"
+    ftp_write_enable: "YES"
+    ftp_chroot_local_user: "YES"
+    ftp_passive_ports_min: 50000
+    ftp_passive_ports_max: 50100
+
+  tasks:
+    - name: Install vsftpd
+      apt:
+        name: vsftpd
+        state: present
+        update_cache: yes
+
+    - name: Configure vsftpd
+      template:
+        src: vsftpd.conf.j2
+        dest: /etc/vsftpd.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: Restart vsftpd
+
+    - name: Open firewall ports
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - 20
+        - 21
+        - "{{ ftp_passive_ports_min }}:{{ ftp_passive_ports_max }}"
+
+    - name: Ensure vsftpd service is enabled and running
+      service:
+        name: vsftpd
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart vsftpd
+      service:
+        name: vsftpd
+        state: restarted

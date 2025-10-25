@@ -1,9 +1,20 @@
+
+#- name: Sll check
+#  ansible.builtin.import_playbook: playbook-02-get-cert.yaml
+
+#- name: Postgres install
+#  ansible.builtin.import_playbook: playbook-03-postgres-check.yaml
+
 - name: Taiga Install Playbook
   hosts: all
-
   tasks:
-    - include: playbook-01-nginx-check.yaml
-    - include: playbook-02-ssl-check.yaml
-    - include: playbook-03-postrges-check.yaml
+
+    - name: Postgres setup 
+      postgres:
+        user: 
+          name: taiga 
+        db_names: 
+          - taiga
+
 
 

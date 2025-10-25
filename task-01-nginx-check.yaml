@@ -2,10 +2,6 @@
   package_facts:
     manager: auto
 
-- name: Install nginx if required
-  when: "'nginx' not in ansible_facts.packages"
-  import_tasks: role-01-nginx-install.yaml
-
 - name: Install nginx on Debian-based Platforms
   apt:
     name: nginx

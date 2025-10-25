@@ -3,7 +3,7 @@ import yaml
 import argparse
 from sys import stdout
 
-def add_host(host:str, filename = None, group:str = 'nogroup', ssh_key:str = '', user:str = '', sudo_pass = None):
+def add_host(host:str, filename = None, group = 'nogroup', ssh_key:str = '', user:str = '', sudo_pass = None):
     new_info = {host:{}}
 
     if sudo_pass:
@@ -22,11 +22,13 @@ def add_host(host:str, filename = None, group:str = 'nogroup', ssh_key:str = '',
     else:
         with open(filename, "r") as f:
             data = yaml.full_load(f)
+        if not data:
+            data = {}
 
     try:
         edit_hosts = data[group]['hosts']
         edit_hosts.update(new_info)
-    except KeyError:
+    except:
         data.update({group:{'hosts':new_info}})
 
        

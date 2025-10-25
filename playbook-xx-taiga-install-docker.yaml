@@ -1,0 +1,6 @@
+- name: Taiga Install Playbook on local web addres
+  hosts: all
+
+  tasks:
+    - name: Clone git repo 
+

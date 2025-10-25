@@ -1,0 +1,29 @@
+server {
+  listen 80;
+  
+  server_name {{ inventory_hostname }} www.{{ inventory_hostname }};
+  root /var/www/{{ inventory_hostname }}/;
+
+  }
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name {{inventory_hostname}} www.{{inventory_hostname}};
+
+    # SSL Certificate paths
+    #ssl_certificate /root/.getssl/{{inventory_hostname}}/{{inventory_hostname}}.crt;
+    #ssl_certificate_key /root/.getssl/{{inventory_hostname}}/{{inventory_hostname}}.key;
+    
+    
+    # OCSP Stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    
+    # Root directory and index
+    root /var/www/{{ inventory_hostname }}/;
+    index index.html index.htm;
+}
+
+
+

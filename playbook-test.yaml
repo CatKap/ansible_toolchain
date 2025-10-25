@@ -1,0 +1,9 @@
+- name: Test change
+  hosts: all
+  vars:
+    acl_path: '/var/www/{{inventory_hostname}}/.well-known/'
+  tasks:
+    - name: Change Acme Challange Location directory
+      ansible.builtin.raw: "echo \"ACL=('{{ acl_path }}acme-challenge')\" >> /root/.getssl/{{inventory_hostname}}/getssl.cfg"
+      become: true
+
