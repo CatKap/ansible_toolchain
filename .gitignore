@@ -4,4 +4,4 @@ inventory.yml
 modules/
 roles/
 ansible-pure-ftpd/
-weareinactive*/
+weareinactive.*/
