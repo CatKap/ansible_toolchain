@@ -1,0 +1,10 @@
+- name: Default example 
+  hosts: all
+  roles:
+    - role: repo
+      vars:
+        dir: /home/kapitan/Cooooodiiiing/ansiblyat/test/ 
+        repos:
+          - name: pretty
+            url: https://github.com/CatKap/pretifull-install
+

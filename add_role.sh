@@ -1,7 +1,9 @@
 #!/bin/bash
 
-if ! $!; then
-  echo "Usage: add_role.sh role_name\n Adding a simple ansible role for you script" 
+if [[ $# -eq 0 ]]; then
+  echo "Usage: add_role.sh [role_name]"
+  echo "Adding a simple ansible role for you script" 
+  exit
 fi
 
 
