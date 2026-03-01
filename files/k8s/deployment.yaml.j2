@@ -1,0 +1,33 @@
+{% for space in spaces %}
+{%for app in space.pods %}
+
+apiVersion: apps/v1 # The API version for Deployments
+kind: Deployment # The type of Kubernetes resource
+metadata:
+  namespace: {{service.name}}
+  name: {{app.name}} # The name of the Deployment
+  labels:
+    app: {{app.name}} # Labels to identify the Deployment
+spec:
+  replicas: {{app.replicas if app.replicas is defined else 1 }} # The desired number of pod replicas
+  selector:
+    matchLabels:
+      app: {{app.name}} # Selects pods with the label "app: nginx"
+  template: # The template for the pods that will be created
+    metadata:
+      labels:
+        app: {{app.name}} # Labels to apply to the pods
+    spec:
+      containers:
+      - name: {{app.name}} # Name of the container
+        image: {{app.image}} # The Docker image to use
+        ports:
+        - containerPort: {{app.internalPort}} # The port the container listens on
+      envFrom:  
+        - configMapRef:
+            name: {{app.name}}-configmap
+          
+---
+{% endfor %}
+{% endfor %}
+

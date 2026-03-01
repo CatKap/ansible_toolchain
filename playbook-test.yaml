@@ -7,3 +7,6 @@
       ansible.builtin.raw: "echo \"ACL=('{{ acl_path }}acme-challenge')\" >> /root/.getssl/{{inventory_hostname}}/getssl.cfg"
       become: true
 
+
+
+

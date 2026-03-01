@@ -1,0 +1,20 @@
+{% for space in spaces %}
+{%for app in space.pods%}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{app.name}}-service 
+  namespace: {{space.name}}
+  annotations:
+    prometheus.io/scrape: "true"
+spec:
+  selector:
+    app.kubernetes.io/name: {{app.name}}
+  ports:
+    - protocol: TCP
+      port: {{app.servicePort}} 
+      targetPort: {{app.internalPort}}
+---
+{% endfor %}
+{% endfor %}

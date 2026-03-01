@@ -1,0 +1,31 @@
+- name: Get sha265
+  block:
+    - name: Trying gitclone
+      ansible.builtin.shell: "gitclone commit {{workdir}}{{item.name}}"
+      register: sha_result 
+      changed_when: false
+      become: true
+      become_user: "{{user if user is defined else root}}"
+  rescue:
+    - name: Trying git 
+      ansible.builtin.shell: "git rev-parse --short HEAD"
+      args:
+        chdir: "{{workdir}}{{item.name}}"
+      register: sha_result 
+      changed_when: false
+      become: true
+      become_user: "{{user if user is defined else root}}"
+  
+
+  
+
+- name: Set sha sum for item
+  set_fact:
+    sha_sums: >-
+      {{
+        sha_sums | combine({
+          item.name: sha_result.stdout
+        })
+      }}
+
+  

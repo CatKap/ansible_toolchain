@@ -1,0 +1,14 @@
+spaces:
+  - name: system
+    host: rewrd.ru
+    pods:
+      - name: registry
+        image: registry
+        prefix: registry.
+        route: '/'  
+        internalPort: 80
+        servicePort: 80
+        # replicas: 2
+        envfile: ./example.env.yaml
+
+

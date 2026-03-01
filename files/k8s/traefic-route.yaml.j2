@@ -1,0 +1,21 @@
+{% for space in spaces %}
+{%for app in space.pods %}
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{app.name}}-route
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{app.prefix if app.prefix is defined else ''}}{{space.host}}`) && PathPrefix(`{{app.route}}`)
+    kind: Rule
+    services:
+    - name: {{app.name}}-service 
+      port: {{app.servicePort}} 
+---
+{%endfor%}
+
+{%endfor%}

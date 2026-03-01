@@ -1,0 +1,25 @@
+- name: Install docker registry on host 
+  hosts: docker_registry
+  tasks:
+    - name: Get free port
+      include_tasks: ./task-get-free-port-loop.yaml
+      loop: 
+        - registry
+
+
+    - name: Ensure the registry Docker image is pulled
+      community.docker.docker_image:
+        name: registry
+        source: pull
+        state: present
+      register: image_pull_result
+      
+    - name: Ensure a "hello-world" web container is running
+      community.docker.docker_container:
+        name: web_hello_world
+        image: hello-world
+        ports:
+          - "80:80"
+        state: started
+        restart_policy: always
+      register: container_deploy_result

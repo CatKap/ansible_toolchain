@@ -1,0 +1,13 @@
+- name: Get a free port quickly
+  shell: "/bin/env python3 -c 'import socket; s=socket.socket(); s.bind((\"\",0)); print(s.getsockname()[1]); s.close()'"
+  register: free_port
+  changed_when: false
+
+- name: Set sha sum for item
+  set_fact:
+    ports: >-
+      {{
+        ports | combine({
+          item.name: free_port.stdout
+        })
+      }}

@@ -1,0 +1,17 @@
+- name: Default example 
+  hosts: all
+  roles:
+    - role: repo
+      vars:
+        #preinstall_ssh_key: 
+        #  file: "{{ ssh_key_file_path }}"
+        #  host: git@github.com
+        #use_forward_agent: true
+        #ssh_key: "{{ ssh_key_file }}"
+        #ssh_pub_key: "{{ ssh_key_file }}.pub"
+        dir: /home/kapitan/Cooooodiiiing/ansiblyat/test/ 
+        repos:
+          - name: pretty
+            ssh_key: /root/.ssh/git_key
+            url: git@github.com:CatKap/pretifull-install.git
+

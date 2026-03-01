@@ -1,0 +1,108 @@
+- name: Debian | Install required packages
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Debian | Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Debian | Add Docker repository
+  apt_repository:
+    repo: >
+      deb [arch={{ ansible_architecture }}]
+      https://download.docker.com/linux/{{ ansible_distribution | lower }}
+      {{ ansible_distribution_release }} stable
+    state: present
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Debian | Install Docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+  become: true
+  ignore_erros: true
+
+- name: Debian | Install Docker
+  apt:
+    name:
+      - docker.io
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+  become: true
+  ignore_erros: true
+
+- name: RHEL | Install required packages
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+    state: present
+  when: ansible_os_family == "RedHat"
+  become: true
+
+- name: RHEL | Add Docker repository
+  yum_repository:
+    name: docker
+    description: Docker CE repo
+    baseurl: https://download.docker.com/linux/centos/9/x86_64/stable
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+    enabled: yes
+  when: ansible_os_family == "RedHat"
+  become: true
+
+- name: RHEL | Install Docker
+  yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+  when: ansible_os_family == "RedHat"
+  become: true
+
+- name: Ensure AppArmor is installed and running (Debian/Ubuntu)
+  become: true
+  apt:
+    name:
+      - apparmor
+      - apparmor-utils
+    state: present
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Enable and start AppArmor service
+  become: true
+  service:
+    name: apparmor
+    state: started
+    enabled: yes
+  when: ansible_os_family == "Debian"
+
+- name: Verify apparmor_parser is available
+  command: apparmor_parser --version
+  register: apparmor_check
+  changed_when: false
+  failed_when: apparmor_check.rc != 0
+  when: ansible_os_family == "Debian"
+
+- name: Debug AppArmor version
+  debug:
+    var: apparmor_check.stdout
+  when: ansible_os_family == "Debian"

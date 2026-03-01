@@ -1,0 +1,14 @@
+- name: Check if vars file exists on host
+  stat:
+    path: "{{workdir}}{{node_read_file}}"
+  register: remote_file 
+  become_user: "{{ user }}"
+  become: true
+
+- name: Read vars file from remote node
+  ansible.builtin.slurp:
+    src: "{{workdir}}{{node_read_file}}"
+  register: remote_vars
+  when: remote_file.stat.exists
+  become_user: "{{ user }}"
+  become: true

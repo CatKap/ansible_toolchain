@@ -1,0 +1,31 @@
+- name: Custom nginx installation with JWT auth module
+  hosts: all
+  vars:
+    NGINX_VERSION: 1.20.1
+
+  roles:
+    - name: repo
+      vars:
+        repos:
+          - name: nginx-auth-jwt
+            url: https://github.com/kjdev/nginx-auth-jwt.git
+
+  tasks:
+
+    - name: Get nginx source 
+      ansible.builtin.get_url:
+        url: http://nginx.org/download/nginx-{{NGINX_VERSION}}.tar.gz
+        dest: nginx-using.tar.gz
+
+    - name: Unpack nginx
+      command: tar -zxf nginx-using.tar.gz
+
+    - name: Install nginx 
+
+
+
+
+
+
+
+
