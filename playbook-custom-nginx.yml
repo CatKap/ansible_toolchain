@@ -1,31 +1,130 @@
+# This playbook provides custom nginx 
+# module with jwt autheification. Compiled 
+# on machine itself
 - name: Custom nginx installation with JWT auth module
-  hosts: all
+  hosts: router
   vars:
-    NGINX_VERSION: 1.20.1
+    NGINX_VERSION: 1.24.0
+    workdir: /var/
+    nginx_workdir: "{{workdir}}nginx/"
+    user: kapitan 
 
   roles:
     - name: repo
       vars:
+        use_git: true
+        dir: "{{nginx_workdir}}"
         repos:
           - name: nginx-auth-jwt
             url: https://github.com/kjdev/nginx-auth-jwt.git
+        
 
   tasks:
+    - name: Check dir
+      ansible.builtin.file:
+        path: "{{nginx_workdir}}"
+        state: directory
 
-    - name: Get nginx source 
+
+    - name: Install build dependencies for compiling nginx (Debian)
+      ansible.builtin.apt:
+        name:
+          - build-essential
+          - libpcre2-dev
+          - zlib1g
+          - zlib1g-dev
+          - libssl-dev
+          - libjansson-dev
+          - git
+          - curl
+          - ca-certificates
+          - libxcrypt-dev
+          - libcrypt-dev
+
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+      become: true
+      ignore_errors: true
+
+    
+    - name: Install build dependencies for compiling nginx (Fedora)
+      ansible.builtin.dnf:
+        name:
+          - gcc
+          - gcc-c++
+          - make
+          - pcre
+          - jansson-devel
+          - pcre-devel
+          - zlib
+          - zlib-devel
+          - openssl
+          - openssl-devel
+          - git
+          - curl
+          - ca-certificates
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+      become: true
+    
+
+    - name: Get nginx source
       ansible.builtin.get_url:
         url: http://nginx.org/download/nginx-{{NGINX_VERSION}}.tar.gz
-        dest: nginx-using.tar.gz
+        dest: "{{nginx_workdir}}nginx-using.tar.gz"
 
     - name: Unpack nginx
-      command: tar -zxf nginx-using.tar.gz
+      ansible.builtin.command: tar -zxf nginx-using.tar.gz
+      args:
+        chdir: "{{ nginx_workdir }}"
+      when: true
 
-    - name: Install nginx 
+    - name: Configure nginx 
+      shell: | 
+        CFLAGS="-Wno-deprecated-declarations" ./configure \
+        --add-dynamic-module=../nginx-auth-jwt \
+        --prefix=/etc/nginx \
+        --sbin-path=/usr/sbin/nginx \
+        --modules-path=/usr/lib/nginx/modules \
+        --conf-path=/etc/nginx/nginx.conf \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --pid-path=/var/run/nginx.pid \
+        --lock-path=/var/run/nginx.lock \
+        --with-http_ssl_module \
+        --with-http_dav_module \
+        --with-http_stub_status_module \
+        --with-http_realip_module \
+        --with-http_v2_module \
+        --with-threads \
+        --with-file-aio 
+      args:
+        chdir: "{{nginx_workdir}}nginx-{{NGINX_VERSION}}"
 
 
+    - name: Make nginx 
+      shell: make -j $(nproc) 
+      args:
+        chdir: "{{nginx_workdir}}nginx-{{NGINX_VERSION}}"
+
+    - name: Install nginx
+      command: make install
+      args:
+        chdir: "{{nginx_workdir}}nginx-{{NGINX_VERSION}}"
+      become: true
 
 
-
-
-
+    - name: Mkdir for sites
+      command: mkdir -p /etc/nginx/sites-enabled 
+      become: true
+  
+    - name: Copy file to host
+      copy:
+        src: ./files/nginx.service
+        dest: /etc/systemd/system/nginx.service
+        owner: root
+        group: root
+        mode: '0644'
+      become: true
 

@@ -1,0 +1,41 @@
+---
+- name: Desribe a dns driver 
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars-secret.yaml
+
+  tasks:
+  - name: Check default zone
+    kapitan.usefull.state.set:
+      key: 'test.hello'
+      value: 'world'
+      statefile: '/home/kapitan/Cooooodiiiing/ansiblyat/examples/teststate.ansible'
+
+  - name: Check default zone
+    kapitan.usefull.state.get:
+      key: 'test.hello'
+      statefile: '/home/kapitan/Cooooodiiiing/ansiblyat/examples/teststate.ansible'
+    register: val
+
+  - name: Multi-value 
+    kapitan.usefull.state.set:
+      key: 'test.hello.value'
+      value: 'world1'
+      statefile: '/home/kapitan/Cooooodiiiing/ansiblyat/examples/teststate.ansible'
+
+  - name: Multi-value 
+    kapitan.usefull.state.set:
+      key: 'test.hello.value2'
+      value: 'world2'
+      statefile: '/home/kapitan/Cooooodiiiing/ansiblyat/examples/teststate.ansible'
+
+  - name: Check default zone
+    kapitan.usefull.state.get:
+      key: 'test.hello'
+      statefile: '/home/kapitan/Cooooodiiiing/ansiblyat/examples/teststate.ansible'
+    register: val
+
+  - name: debug
+    debug:
+      msg: '{{val["value"].value2}}'

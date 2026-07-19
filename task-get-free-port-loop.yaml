@@ -3,7 +3,7 @@
   register: free_port
   changed_when: false
 
-- name: Set sha sum for item
+- name: Set port for item
   set_fact:
     ports: >-
       {{

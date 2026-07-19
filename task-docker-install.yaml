@@ -9,18 +9,19 @@
   when: ansible_os_family == "Debian"
   become: true
 
-- name: Debian | Add Docker GPG key
-  apt_key:
-    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
-    state: present
-  when: ansible_os_family == "Debian"
+- name: Add Docker GPG key (correct way)
+  shell: |
+    curl -fsSL https://download.docker.com/linux/debian/gpg \
+    | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/docker-archive-keyring.gpg
   become: true
 
-- name: Debian | Add Docker repository
+- name: Add Docker repository
   apt_repository:
     repo: >
-      deb [arch={{ ansible_architecture }}]
-      https://download.docker.com/linux/{{ ansible_distribution | lower }}
+      deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg]
+      https://download.docker.com/linux/debian
       {{ ansible_distribution_release }} stable
     state: present
   when: ansible_os_family == "Debian"
@@ -35,7 +36,7 @@
     update_cache: yes
   when: ansible_os_family == "Debian"
   become: true
-  ignore_erros: true
+  ignore_errors: true
 
 - name: Debian | Install Docker
   apt:
@@ -44,7 +45,7 @@
     update_cache: yes
   when: ansible_os_family == "Debian"
   become: true
-  ignore_erros: true
+  ignore_errors: true
 
 - name: RHEL | Install required packages
   yum:
@@ -87,22 +88,18 @@
     update_cache: yes
   when: ansible_os_family == "Debian"
 
-- name: Enable and start AppArmor service
+- name: Enable and start Docker service
   become: true
   service:
-    name: apparmor
+    name: docker
     state: started
-    enabled: yes
+    enabled: true
   when: ansible_os_family == "Debian"
 
-- name: Verify apparmor_parser is available
-  command: apparmor_parser --version
-  register: apparmor_check
-  changed_when: false
-  failed_when: apparmor_check.rc != 0
-  when: ansible_os_family == "Debian"
 
-- name: Debug AppArmor version
-  debug:
-    var: apparmor_check.stdout
-  when: ansible_os_family == "Debian"
+- name: Mkdir for sites
+  command: mkdir -p /etc/nginx/sites-enabled 
+  become: true
+
+
+

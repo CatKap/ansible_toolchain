@@ -1,0 +1,49 @@
+---
+- name: Install Docker and login to registry
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Include docker secret
+      ansible.builtin.include_vars:
+        file: secrets/docker-secret.yaml
+
+    - name: Install required packages for Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: true
+
+    - name: Logout from Docker registry
+      community.docker.docker_login:
+        registry_url: "{{ docker_registry_url }}"
+        state: absent
+      ignore_errors: true
+
+
+    - name: Login to Docker registry
+      community.docker.docker_login:
+        registry_url: "{{ docker_registry_url }}"
+        username: "{{ docker_registry_username }}"
+        password: "{{ docker_registry_password }}"

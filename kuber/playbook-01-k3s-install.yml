@@ -1,0 +1,32 @@
+---
+- name: Cluster prep
+  hosts: k3s_cluster
+  gather_facts: true
+  vars:
+    k3s_version: v1.29.3+k3s1  
+  become: true
+  roles:
+  - role: k3s.orchestration.prereq
+    k3s_version: "{{ k3s_version }}"
+  - role: k3s.orchestration.airgap
+    k3s_version: "{{ k3s_version }}"
+  - role: k3s.orchestration.raspberrypi
+    k3s_version: "{{ k3s_version }}"
+
+- name: Setup K3S server
+  hosts: server
+  become: true
+  roles:
+    - role: k3s.orchestration.k3s_server
+      vars:
+        k3s_version: "{{ k3s_version }}"
+
+- name: Setup K3S agent
+  hosts: agent
+  become: true
+  roles:
+    - role: k3s.orchestration.k3s_agent
+      vars:
+        k3s_version: "{{ k3s_version }}"
+
+

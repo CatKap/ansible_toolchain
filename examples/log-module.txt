@@ -1,0 +1,1 @@
+certbot certonly  --non-interactive --manual --agree-tos --no-eff-email --no-redirect --preferred-challenges dns --manual-auth-hook /etc/letsencrypt/obtain_dns_auth_hook.py -d *.khudyakova-psy.ru > /var/ansible-certbot.log

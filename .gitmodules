@@ -1,0 +1,3 @@
+[submodule "nginx-auth-jwt"]
+	path = nginx-auth-jwt
+	url = https://github.com/kjdev/nginx-auth-jwt.git

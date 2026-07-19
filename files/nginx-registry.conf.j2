@@ -1,0 +1,18 @@
+server {
+  listen 80;
+  server_name {{inventory_hostname}} www.{{inventory_hostname}};
+  return 301 https://$host$request_uri;
+}
+
+
+
+
+server {
+  listen 443 ssl;
+  server_name {{inventory_hostname}} www.{{inventory_hostname}};
+ client_max_body_size 5G;   # 
+      location / {
+        proxy_pass http://localhost:{{ports['registry']}}/;
+      }
+}
+

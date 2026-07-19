@@ -1,0 +1,33 @@
+---
+- name: Desribe a dns driver 
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars-secret.yaml
+
+  tasks:
+  - name: Check default zone
+    kapitan.usefull.dns:
+      provider: regru
+      credentials:
+        username: "{{ username }}"
+        password: "{{ password }}"
+
+      domains:
+        - storyball.online
+        - storyball.ru
+
+      records:
+        - type: alias # Or A 
+          subdomain: '@' # Add ip addres to this domain 
+          ipaddr: 95.174.100.11
+          
+        - type: alias # Or A 
+          subdomain: www # Add ip addres to this domain 
+          ipaddr: 95.174.100.11
+
+
+
+
+
+

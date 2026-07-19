@@ -1,0 +1,18 @@
+---
+- name: Desribe a dns driver 
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars-secret.yaml
+
+  tasks:
+  - name: Check default zone
+    kapitan.usefull.certs:
+      provider: regru
+      domain: 'storyball.ru'
+      certdir: /home/kapitan/
+      dns_credentials:
+        username: "{{ username }}"
+        password: "{{ password }}"
+    become: true
+
