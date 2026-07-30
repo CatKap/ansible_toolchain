@@ -1,0 +1,73 @@
+- name: Obtain wildcard ssl certificates for specifyed domains
+  hosts: localhost
+    vars_files:
+    - vars/zone.yaml
+    - vars/vars-secret.yaml
+
+  vars:
+    certdir: "/etc/letsencrypt/live/"
+
+  tasks:
+    - debug:
+        msg: "{{db_password}}"
+    - name: Install certbot 
+      include_tasks: ./toolchain/task-install-certbot.yaml
+
+      # So if the
+    - name: Check certificates existance
+      kapitan.usefull.state.get:
+        key: "{{domain}}.certs"
+        statefile: "{{playbook_dir}}/local.state"
+        register: certs
+
+
+    - name: End play if certs exsist
+      meta: end_play
+      when: certs.vaulue.live is true 
+      
+    - name: Get user 
+      set_fact: 
+        this_user:  "{{ lookup('env', 'USER') }}"
+    
+  
+    - name: Get ssl certificates  
+      kapitan.usefull.certs:
+        provider: regru
+        domain: '{{domain}}' 
+        dns_credentials:
+          username: "{{ dns_username }}"
+          password: "{{ dns_password }}"
+      register: ret
+      become: true
+    
+    - name: Directory for certs 
+      ansible.builtin.file:
+        mode: '700'
+        state: directory
+        path: "{{playbook_dir}}/certs"
+        owner: "{{this_user}}"
+    - debug:
+        msg: "{{playbook_dir}}"
+
+    - name: Check files link 
+      ansible.builtin.command:
+        cmd: "cp {{certdir}}{{item}} {{playbook_dir}}/certs/{{item}}"
+      loop:
+        - "fullchain.pem"
+        - "privkey.pem"
+      become: true
+
+    - name: Check files permissions 
+      ansible.builtin.file:
+        mode: '600'
+        owner: "{{this_user}}"
+        path: "{{playbook_dir}}/certs/{{item}}"
+        group: "{{this_user}}"
+      loop:
+        - "fullchain.pem"
+        - "privkey.pem"
+      become: true
+
+
+      
+

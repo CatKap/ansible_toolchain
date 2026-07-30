@@ -1,0 +1,26 @@
+- name: Install nginx on host if not exsist
+  hosts: router
+  vars_files:
+    - "{{ playbook_dir }}/vars/zone.yaml"
+
+  tasks:
+
+    - name: Check nginx installation
+      kapitan.usefull.state.get:
+        key: "this.installed.nginx"
+      register: nginx_exists
+      become: true
+
+
+#    - name: End play if nginx installed
+#      when: nginx_exists['value'] is defined
+#      meta: end_play
+
+    - name: Install nginx on host
+      import_tasks: ./tasks/nginx-install.yaml
+
+    - name: Set nginx installation fact
+      kapitan.usefull.state.set:
+        key: "this.installed.nginx"
+        value: true
+      become: true

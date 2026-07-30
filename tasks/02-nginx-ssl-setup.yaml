@@ -1,0 +1,14 @@
+- name: Copy server config file to nginx  
+  ansible.builtin.template:
+    src: ./files/nginx-after-ssl.conf.j2
+    dest: /etc/nginx/sites-enabled/{{inventory_hostname}}.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart nginx 
+  systemd:
+    name: nginx.service
+    state: restarted
+  become: true
+

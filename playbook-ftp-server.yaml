@@ -35,6 +35,7 @@
         - 20
         - 21
         - "{{ ftp_passive_ports_min }}:{{ ftp_passive_ports_max }}"
+      ignore_errors: true
 
     - name: Ensure vsftpd service is enabled and running
       service:

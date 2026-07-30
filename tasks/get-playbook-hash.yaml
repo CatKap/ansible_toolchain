@@ -1,0 +1,25 @@
+- debug:
+    msg: "{{playbook_dir}}"
+
+- name: Get playbook hash
+  stat:
+    path: "{{ playbook_dir }}/{{ item }}"
+    checksum_algorithm: sha256
+  delegate_to: localhost
+  register: __stat_pb_hash
+  loop:
+    - "{{ ansible_play_name }}.yml"
+    - "{{ ansible_play_name }}.yaml"
+
+  when: pb_hash is not defined or pb_hash.stat.exists is false  # Stop after first success 
+
+- debug:
+    msg: "{{__stat_pb_hash.results}}"
+
+- set_fact:
+    pb_hash: "{{__stat_pb_hash.results[0].stat.checksum}}"
+  when: __stat_pb_hash.results[0].stat.exists is not false  # Stop after first success 
+
+- set_fact:
+    pb_hash: "{{__stat_pb_hash.results[1].stat.checksum}}"
+  when: __stat_pb_hash.results[1].stat.exists is not false  # Stop after first success 

@@ -1,0 +1,33 @@
+- name: Get certificate paths from local state
+  kapitan.usefull.state.get:
+    key: "{{ domain }}.certs"
+    statefile: "{{ statefile if statefile is defined else omit }}"
+  register: cert_state
+  delegate_to: localhost
+
+- name: Ensure custom certificates directory exists
+  file:
+    path: "/certs/{{ domain }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+
+
+- name: Copy certificate files to /certs/{{ domain }}
+  copy:
+    src: "{{ cert_state.value.cert | dirname }}/{{ item }}"
+    dest: "/certs/{{ domain }}/{{ item }}"
+    mode: "{{ '0600' if 'privkey' in item else '0644' }}"
+  loop:
+    - fullchain.pem
+    - privkey.pem
+  become: true
+
+
+- name: Update state on host
+  kapitan.usefull.state.set:
+    key: "{{ domain }}.certs.live"
+    value: true
+  become: true

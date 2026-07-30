@@ -34,8 +34,8 @@
      
     - name: Ensure a registry container is running
       community.docker.docker_container:
-        name: registry 
-        image: registry 
+        name: registry
+        image: registry
         ports:
           - "{{ports['registry']}}:5000"
         state: started
@@ -49,7 +49,7 @@
         dest: "/etc/nginx/sites-enabled/{{inventory_hostname}}.conf"
         backup: false
       become: true
-        
+      
     - name: Check nginx configuration
       command: nginx -t
       become: true

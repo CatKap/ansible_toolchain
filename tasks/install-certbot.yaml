@@ -1,0 +1,21 @@
+- name: Install certbot on Debian/Ubuntu
+  apt:
+    name: certbot
+    state: present
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install certbot on RHEL-based systems
+  dnf:
+    name: certbot
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure certbot is installed
+  command: certbot --version
+  register: certbot_version
+  changed_when: false
+
+- name: Show certbot version
+  debug:
+    var: certbot_version.stdout

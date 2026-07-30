@@ -1,0 +1,58 @@
+--- 
+- name: Provide dns records 
+  vars_files:
+    - inventory.yml
+    - vars/vars-secret.yaml
+    - vars/zone.yaml
+  hosts: localhost 
+
+  tasks:  
+    - name: Add api alias  
+      kapitan.usefull.dns:
+        provider: "{{dns_provider}}"
+        domains: 
+          - "{{domain}}"
+        credentials:
+          username: "{{dns_username}}"
+          password: "{{dns_password}}"
+        records:
+          - type: alias
+            subdomain: api
+            ipaddr: "{{zone.api if zone.api is defined else def_ip}}" 
+      when: router is defined
+
+    - name: Add registry alias  
+      kapitan.usefull.dns:
+        provider: "{{dns_provider}}"
+        domains: 
+          - "{{domain}}"
+        credentials:
+          username: "{{dns_username}}"
+          password: "{{dns_password}}"
+
+        records:
+          - type: alias
+            subdomain: registry
+            ipaddr: "{{zone.registry if zone.registry is defined else def_ip}}" 
+      when: registry is defined
+
+    - name: Add front alias  
+      kapitan.usefull.dns:
+        provider: "{{dns_provider}}"
+        domains: 
+          - "{{domain}}"
+        credentials:
+          username: "{{dns_username}}"
+          password: "{{dns_password}}"
+        records:
+          - type: alias
+            subdomain: app
+            ipaddr: "{{zone.app if zone.app is defined else def_ip}}" 
+
+          - type: alias
+            subdomain: '@'
+            ipaddr: "{{zone.app if zone.app is defined else def_ip}}" 
+      when: front is defined
+
+
+

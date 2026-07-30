@@ -1,8 +1,0 @@
-- name: Postgress install
-  hosts: all
-  roles:
-    -role: postgres
-    vars:
-      modules:
-        pgrx: pg_graphql
-

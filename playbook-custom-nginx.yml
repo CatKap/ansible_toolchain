@@ -7,7 +7,9 @@
     NGINX_VERSION: 1.24.0
     workdir: /var/
     nginx_workdir: "{{workdir}}nginx/"
-    user: kapitan 
+    user: kapitan
+    use_jwt:  true
+
 
   roles:
     - name: repo
@@ -98,13 +100,13 @@
         --with-http_realip_module \
         --with-http_v2_module \
         --with-threads \
-        --with-file-aio 
+        --with-file-aio
       args:
         chdir: "{{nginx_workdir}}nginx-{{NGINX_VERSION}}"
 
 
-    - name: Make nginx 
-      shell: make -j $(nproc) 
+    - name: Make nginx
+      shell: make -j $(nproc)
       args:
         chdir: "{{nginx_workdir}}nginx-{{NGINX_VERSION}}"
 

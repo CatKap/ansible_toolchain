@@ -1,0 +1,27 @@
+- name: Install docker on host if not exsist
+  hosts: docker
+  tasks:
+    - name: Check docker installation
+      kapitan.usefull.state.get:
+        key: "this.installed.docker"
+      register: docker_exists
+      become: true
+    
+    - debug:
+        msg: "{{ docker_exists}}"
+
+
+
+    - name: End play if docker installed
+      when: docker_exists['value'] is defined
+      meta: end_play
+
+    - name: Install docker on host
+      import_tasks: ./tasks/docker-install.yaml
+
+    - name: Set docker installation fact
+      kapitan.usefull.state.set:
+        key: "this.installed.docker"
+        value: true
+      become: true
+
